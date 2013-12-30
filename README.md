@@ -72,3 +72,26 @@ thing.on('named', function(name) {
   console.log('The thing is called: ' + name);
 });
 ```
+
+Development
+------------
+
+### Prerequisites
+
+```bash
+$ npm install -g grunt-cli
+$ npm install
+```
+
+### Tasks
+
+```bash
+# lint and test:
+$ grunt
+# lint and test as you save files
+$ grunt dev
+# setup karma hub and test as you save
+$ grunt test
+# generate code coverage
+$ grunt cover
+```
