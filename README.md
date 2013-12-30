@@ -71,6 +71,8 @@ var thing = new Thing();
 thing.on('named', function(name) {
   console.log('The thing is called: ' + name);
 });
+thing.setName('banana');
+// -> 'The thing is called: banana'
 ```
 
 Development
