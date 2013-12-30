@@ -88,8 +88,10 @@ $ npm install
 ```bash
 # lint and test:
 $ grunt
+# lint as you save
+$ grunt watch:lint
 # lint and test as you save files
-$ grunt dev
+$ grunt watch:dev
 # setup karma hub and test as you save
 $ grunt test
 # generate code coverage

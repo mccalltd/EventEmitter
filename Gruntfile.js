@@ -61,6 +61,13 @@ module.exports = function(grunt) {
       }
     },
     watch: {
+      lint: {
+        options: {
+          atBegin: true
+        },
+        files: ['*.js'],
+        tasks: ['jshint']
+      },
       dev: {
         options: {
           atBegin: true
@@ -77,7 +84,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-shell');
 
   grunt.registerTask('default', ['jshint', 'karma:test']);
-  grunt.registerTask('dev', ['watch:dev']);
   grunt.registerTask('test', ['karma:watch']);
   grunt.registerTask('cover', ['karma:coverage']);
 };
