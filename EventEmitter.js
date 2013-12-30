@@ -20,9 +20,6 @@
   function isUndefined(x) {
     return typeof x === 'undefined';
   }
-  function own(obj) {
-    return Object.keys(obj);
-  }
 
   //---------------------------------------------------------
   // EventEmitter
@@ -33,7 +30,7 @@
   }
 
   EventEmitter.extend = function(Type) {
-    own(EventEmitter.prototype).forEach(function(prop) {
+    Object.keys(EventEmitter.prototype).forEach(function(prop) {
       Type.prototype[prop] = EventEmitter.prototype[prop];
     });
   };
@@ -48,7 +45,7 @@
     if (isObject(eventName)) {
       // Register multiple listeners.
       var hash = eventName;
-      own(hash).forEach(function(eventName) {
+      Object.keys(hash).forEach(function(eventName) {
         self.listeners(eventName).push(hash[eventName]);
       });
     } else {
@@ -69,7 +66,7 @@
     if (isObject(eventName)) {
       // Register multiple listeners.
       var hash = eventName;
-      own(hash).forEach(function(prop) {
+      Object.keys(hash).forEach(function(prop) {
         self.on(prop, once(prop, hash[prop]));
       });
     } else {
