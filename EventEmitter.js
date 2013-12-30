@@ -99,8 +99,7 @@
 
   EventEmitter.prototype.emit = function(eventName) {
     var args = Array.prototype.slice.call(arguments).slice(1);
-    var listeners = this.listeners(eventName);
-    listeners.forEach(function(listener) {
+    this.listeners(eventName).forEach(function(listener) {
       listener.apply(null, args);
     });
     return this;
