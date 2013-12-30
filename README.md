@@ -1,7 +1,8 @@
 EventEmitter
 ============
 
-Client-Side JavaScript Events a la Node.js
+> Client-Side JavaScript Events a la Node.js
+
 
 Usage
 -----
@@ -74,6 +75,7 @@ thing.on('named', function(name) {
 thing.setName('banana');
 // -> 'The thing is called: banana'
 ```
+
 
 Development
 ------------
