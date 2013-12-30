@@ -28,7 +28,7 @@ emitter.once({
   baz: function() {}
 });
 
-// Fetching listeners:
+// Fetch listeners:
 emitter.listeners('foo');     // Return an array of listeners for event 'foo'.
 
 // Remove listeners:
