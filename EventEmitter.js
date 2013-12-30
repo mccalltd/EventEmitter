@@ -21,7 +21,7 @@
     return typeof x === 'undefined';
   }
   function own(obj) {
-    return Object.getOwnPropertyNames(obj);
+    return Object.keys(obj);
   }
 
   //---------------------------------------------------------
