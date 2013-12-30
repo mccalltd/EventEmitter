@@ -60,7 +60,7 @@
 
   EventEmitter.prototype.once = function(eventName, listener) {
     var self = this;
-    function once(eventName, listener) {
+    function once(listener) {
       return function oneTimeListener() {
         listener.apply(null, Array.prototype.slice.call(arguments));
         self.off(eventName, oneTimeListener);
@@ -70,11 +70,11 @@
       // Register multiple listeners.
       var hash = eventName;
       own(hash).forEach(function(eventName) {
-        self.on(eventName, once(eventName, hash[eventName]));
+        self.on(eventName, once(hash[eventName]));
       });
     } else {
       // Register a single listener.
-      this.on(eventName, once(eventName, listener));
+      this.on(eventName, once(listener));
     }
     return this;
   };
