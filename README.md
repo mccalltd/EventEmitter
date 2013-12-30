@@ -6,6 +6,8 @@ Client-Side JavaScript Events a la Node.js
 Usage
 -----
 
+### Basics
+
 ```javascript
 // Standalone usage (not extending anything here):
 var emitter = new EventEmitter();
@@ -45,4 +47,24 @@ emitter
   .on('foo', function(who) { console.log('another foo for ' + who); })
   .emit('foo', 'you') // -> 'another foo for you'
   .off();
+```
+
+### Extending Classes With EventEmitter
+
+```javascript
+// Add EventEmitter behaviors to your classes:
+function Thing() {
+  EventEmitter.call(this);
+}
+EventEmitter.extend(Thing);
+Thing.prototype.setName = function(name) {
+  this.name = name;
+  this.emit('named', name);
+};
+
+// Now 'Thing' acts as an EventEmitter:
+var thing = new Thing();
+thing.on('named', function(name) {
+  console.log('The thing is called: ' + name);
+});
 ```
