@@ -43,13 +43,13 @@
   EventEmitter.prototype.on = function(eventName, listener) {
     var self = this;
     if (isObject(eventName)) {
-      // Register multiple listeners.
+      // Add multiple listeners.
       var hash = eventName;
       Object.keys(hash).forEach(function(eventName) {
         self.listeners(eventName).push(hash[eventName]);
       });
     } else {
-      // Register a single listener.
+      // Add a single listener.
       this.listeners(eventName).push(listener);
     }
     return this;
@@ -64,13 +64,13 @@
       };
     }
     if (isObject(eventName)) {
-      // Register multiple listeners.
+      // Add multiple listeners.
       var hash = eventName;
       Object.keys(hash).forEach(function(prop) {
         self.on(prop, once(prop, hash[prop]));
       });
     } else {
-      // Register a single listener.
+      // Add a single listener.
       this.on(eventName, once(eventName, listener));
     }
     return this;
