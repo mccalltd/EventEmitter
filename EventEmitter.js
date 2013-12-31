@@ -56,21 +56,21 @@
 
   EventEmitter.prototype.once = function(eventName, listener) {
     var self = this;
-    function once(eventName, listener) {
-      return function oneTimeListener() {
+    var invokeOnce = function invokeOnce(eventName, listener) {
+      return function oneTimeInvoker() {
         listener.apply(null, Array.prototype.slice.call(arguments));
-        self.off(eventName, oneTimeListener);
+        self.off(eventName, oneTimeInvoker);
       };
     }
     if (isObject(eventName)) {
       // Add multiple listeners.
       var hash = eventName;
       Object.keys(hash).forEach(function(prop) {
-        self.on(prop, once(prop, hash[prop]));
+        self.on(prop, invokeOnce(prop, hash[prop]));
       });
     } else {
       // Add a single listener.
-      this.on(eventName, once(eventName, listener));
+      this.on(eventName, invokeOnce(eventName, listener));
     }
     return this;
   };
@@ -93,11 +93,20 @@
     return this;
   };
 
-  EventEmitter.prototype.emit = function(eventName) {
+  EventEmitter.prototype.emit = function(eventName, options) {
+    options = options || {};
     var args = Array.prototype.slice.call(arguments).slice(1);
-    this.listeners(eventName).forEach(function(listener) {
-      listener.apply(null, args);
-    });
+    this.listeners(eventName).forEach(
+      (options.async) ?
+        function asyncInvoker(listener) {
+          setTimeout(function() {
+            listener.apply(null, args);
+          }, 0);
+        } :
+        function syncInvoker(listener) {
+          listener.apply(null, args);
+        }
+    );
     return this;
   };
 

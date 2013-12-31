@@ -143,7 +143,7 @@ describe('EventEmitter', function() {
   });
 
   describe('emit', function() {
-    it('should invoke all listeners for the event', function() {
+    it('should invoke all listeners for the event synchronously', function() {
       var emitter = new EventEmitter();
       var invocations = 0;
       var inc = function() { invocations++; };
@@ -152,6 +152,20 @@ describe('EventEmitter', function() {
         .on('foo', inc)
         .emit('foo');
       expect(invocations).toBe(2);
+    });
+    it('should invoke all listeners for the event asynchronously', function() {
+      var emitter = new EventEmitter();
+      var invocations = 0;
+      var inc = function() { invocations++; };
+      emitter
+        .on('foo', inc)
+        .on('foo', inc)
+        .emit('foo', { async: true });
+      expect(invocations).toBe(0);
+      waits(1);
+      runs(function() {
+        expect(invocations).toBe(2);
+      });
     });
     it('should be chainable', function() {
       var emitter = new EventEmitter();
