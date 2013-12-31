@@ -18,9 +18,9 @@ var emitter = new EventEmitter();
 // Add listeners for events (single and multiple):
 emitter.on('event', function listener() {});
 emitter.on({
-  foo: function onOne() {},
-  bar: function onOne() {},
-  baz: function onOne() {}
+  foo: function onFoo() {},
+  bar: function onBar() {},
+  baz: function onBaz() {}
 });
 
 // Add one-time listeners (single and multiple):
