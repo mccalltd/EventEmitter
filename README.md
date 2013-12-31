@@ -3,6 +3,7 @@ EventEmitter
 
 > Client-Side JavaScript Events a la Node.js
 
+[![Build Status](https://travis-ci.org/[mccalltd]/[EventEmitter].png)](https://travis-ci.org/[mccalltd]/[EventEmitter]) [Build History](https://travis-ci.org/mccalltd/EventEmitter/builds)
 
 Usage
 -----
