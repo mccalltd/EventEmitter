@@ -3,7 +3,7 @@ EventEmitter
 
 > Client-Side JavaScript Events a la Node.js
 
-[Build History](https://travis-ci.org/mccalltd/EventEmitter/builds) [![Build Status](https://travis-ci.org/mccalltd/EventEmitter.png)](https://travis-ci.org/mccalltd/EventEmitter)
+[![Build Status](https://travis-ci.org/mccalltd/EventEmitter.png)](https://travis-ci.org/mccalltd/EventEmitter)
 
 Usage
 -----
@@ -102,3 +102,8 @@ $ grunt test
 # generate code coverage
 $ grunt cover
 ```
+
+Builds
+------
+
+[History](https://travis-ci.org/mccalltd/EventEmitter/builds)
