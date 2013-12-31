@@ -1,9 +1,10 @@
 EventEmitter
 ============
 
-> Client-Side JavaScript Events a la Node.js
+> Simple Client-Side JavaScript Events a la Node.js
 
 [![Build Status](https://travis-ci.org/mccalltd/EventEmitter.png)](https://travis-ci.org/mccalltd/EventEmitter)
+
 
 Usage
 -----
@@ -102,6 +103,7 @@ $ grunt test
 # generate code coverage
 $ grunt cover
 ```
+
 
 Builds
 ------
