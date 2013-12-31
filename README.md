@@ -10,8 +10,8 @@ Features
 --------
 
 - Operates as a standalone object.
-- Easy to extend your existing classes with its functionality.
-- Available in all JavaScript runtime environements.
+- Easy to make existing classes EventEmitters.
+- Available in all JavaScript runtime environments.
 - AMD/CommonJS compatible.
 - Small set of memorable methods: `on`, `off` and `emit`. That's it.
 - Standardized signature for event listeners: `function(sender, args)`.
