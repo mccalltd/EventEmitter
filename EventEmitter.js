@@ -46,7 +46,7 @@
 
   /**
    * Extend the given Type's prototype with methods from EventEmitter.prototype.
-   * Combined with constrcutor borrowing, this provides for easy inheritance.
+   * Combined with constructor borrowing, this provides for easy inheritance.
    *
    * @param  {Type} Type The type to extend
    * @example
@@ -211,6 +211,7 @@
    * @return {EventEmitter}
    * @example
    *
+   * var emitter = new EventEmitter();
    * emitter.emit('event');
    * emitter.emit('event', arg1, arg2);
    */
@@ -230,6 +231,7 @@
    * @return {EventEmitter}
    * @example
    *
+   * var emitter = new EventEmitter();
    * emitter.emitAsync('event');
    * emitter.emitAsync('event', arg1, arg2);
    */
