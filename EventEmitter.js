@@ -28,15 +28,7 @@
   //---------------------------------------------------------
 
   /**
-   * EventEmitter provides a simple interface for publishing events to subscribers:
-   *
-   * - Operates as a standalone object.
-   * - Easy to extend your existing classes with its functionality.
-   * - Available in all JavaScript runtime environements.
-   * - AMD/CommonJS compatible.
-   * - Chainable API for easy and elegant use.
-   *
-   * Currently it is available for MODERN BROWSERS ONLY.
+   * EventEmitter provides a simple interface for publishing events to subscribers.
    *
    * @constructor
    */

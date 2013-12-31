@@ -6,6 +6,20 @@ EventEmitter
 [![Build Status](https://travis-ci.org/mccalltd/EventEmitter.png)](https://travis-ci.org/mccalltd/EventEmitter)
 
 
+Features
+--------
+
+- Operates as a standalone object.
+- Easy to extend your existing classes with its functionality.
+- Available in all JavaScript runtime environements.
+- AMD/CommonJS compatible.
+- Small set of memorable methods: `on`, `once`, `off`, and `emit`. That's it.
+- Standardized signature for event listeners: `function(sender, args)`.
+- Chainable API for easy and elegant use.
+
+Currently it is available for MODERN BROWSERS ONLY (IE 9+ et al).
+
+
 Usage
 -----
 
@@ -78,32 +92,6 @@ thing.on('named', function(name) {
 });
 thing.setName('banana');
 // -> 'The thing is called: banana'
-```
-
-
-Development
-------------
-
-### Prerequisites
-
-```bash
-$ npm install -g grunt-cli
-$ npm install
-```
-
-### Tasks
-
-```bash
-# lint and test:
-$ grunt
-# lint as you save
-$ grunt watch:lint
-# lint and test as you save files
-$ grunt watch:dev
-# setup karma hub and test as you save
-$ grunt test
-# generate code coverage
-$ grunt cover
 ```
 
 
