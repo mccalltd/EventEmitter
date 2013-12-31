@@ -67,8 +67,10 @@ emitter
   .emit('bar') // -> 'bar'
   .emit('bar') // ->
   .off('foo')
-  .on('foo', function(who) { console.log('another foo for ' + who); })
-  .emit('foo', 'you') // -> 'another foo for you'
+  .on('foo', function(sender, args) {
+    console.log('another foo for ' + args.who);
+  })
+  .emit('foo', { who: 'you' }) // -> 'another foo for you'
   .off();
 ```
 
