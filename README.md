@@ -1,11 +1,10 @@
 EventEmitter
 ============
 
-> Simple Client-Side JavaScript Events a la Node.js
+> Simple JavaScript Event Framework
+
 
 [![Build Status](https://travis-ci.org/mccalltd/EventEmitter.png)](https://travis-ci.org/mccalltd/EventEmitter)
-
-[Build History](https://travis-ci.org/mccalltd/EventEmitter/builds)
 
 
 Features
