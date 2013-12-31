@@ -62,7 +62,7 @@ emitter.emit('event', args, { async: true }); // Emit event asynchronously.
 // Everything is chainable:
 emitter
   .on('foo', function() { console.log('foo'); })
-  .once('bar', function() { console.log('bar'); })
+  .on('bar', function() { console.log('bar'); }, { once: true })
   .emit('foo') // -> 'foo'
   .emit('bar') // -> 'bar'
   .emit('bar') // ->
