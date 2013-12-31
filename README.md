@@ -1,10 +1,9 @@
+[![Build Status](https://travis-ci.org/mccalltd/EventEmitter.png)](https://travis-ci.org/mccalltd/EventEmitter)
+
 EventEmitter
 ============
 
 > Simple JavaScript Event Framework
-
-
-[![Build Status](https://travis-ci.org/mccalltd/EventEmitter.png)](https://travis-ci.org/mccalltd/EventEmitter)
 
 
 Features
