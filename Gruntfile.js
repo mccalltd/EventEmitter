@@ -1,5 +1,23 @@
 module.exports = function(grunt) {
   grunt.initConfig({
+    // package info
+    pkg: grunt.file.readJSON('package.json'),
+
+    // metadata
+    meta: {
+      banner:
+'/*!\n' +
+' * <%= pkg.title || pkg.name %> (v<%= pkg.version %>)\n' +
+' *\n' +
+' * <%= pkg.description %>\n' +
+' * <%= pkg.homepage %>\n' +
+' *\n' +
+' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author %>;\n' +
+' * Licensed under the <%= pkg.license %> license.\n' +
+' */'
+    },
+
+    // lint
     jshint: {
       options: {
         curly: true,
@@ -15,7 +33,11 @@ module.exports = function(grunt) {
       },
       src: {
         options: {
-          browser: true
+          browser: true,
+          globals: {
+            define: true,
+            module: true
+          }
         },
         src: ['EventEmitter.js']
       },
@@ -30,12 +52,14 @@ module.exports = function(grunt) {
             expect: true
           }
         },
-        src: ['EventEmitterSpecs.js']
+        src: ['specs.js']
       }
     },
+
+    // test
     karma: {
       options: {
-        files: ['EventEmitter.js', 'EventEmitterSpecs.js'],
+        files: ['EventEmitter.js', 'specs.js'],
         frameworks: ['jasmine'],
         browsers: ['PhantomJS'],
         reporters: ['dots']
@@ -60,6 +84,21 @@ module.exports = function(grunt) {
         autoWatch: true
       }
     },
+
+    // minify
+    uglify: {
+      dist: {
+        options: {
+          sourceMap: 'dist/EventEmitter.min.map',
+          banner: '<%= meta.banner %>'
+        },
+        files: {
+          'dist/EventEmitter.min.js': ['EventEmitter.js']
+        }
+      }
+    },
+
+    // watch
     watch: {
       lint: {
         options: {
@@ -79,10 +118,12 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-karma');
 
-  grunt.registerTask('default', ['jshint', 'karma:test']);
+  grunt.registerTask('default', ['jshint', 'karma:test', 'uglify']);
   grunt.registerTask('test', ['karma:watch']);
   grunt.registerTask('cover', ['karma:coverage']);
+  grunt.registerTask('ci', ['jshint', 'karma:test']);
 };

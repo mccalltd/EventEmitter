@@ -1,5 +1,4 @@
 ;(function(root, factory) {
-  /* global define, module */
   if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
     define(factory);
   } else if (typeof module === 'object' && typeof module.exports === 'object') {
