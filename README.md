@@ -39,9 +39,11 @@ emitter.off();                // Remove all listeners for all events.
 emitter.off('foo');           // Remove all listeners for event 'foo'.
 emitter.off('foo', listener); // Remove a specific listener for event 'foo'.
 
-// Emit events:
-emitter.emit('event');                  // Emit event with no args.
-emitter.emit('event', arg1, /* ... */); // Emit event with any number of args.
+// Emit events (both synchronously and asynchronously):
+emitter.emit('event');                      // Emit event with no args.
+emitter.emit('event', /* ...args */);       // Emit event with any number of args.
+emitter.emitAsync('event');
+emitter.emitAsync('event', /* ...args */);
 
 // Everything is chainable:
 emitter

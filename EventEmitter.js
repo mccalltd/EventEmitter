@@ -19,6 +19,9 @@
   function isUndefined(x) {
     return typeof x === 'undefined';
   }
+  function setImmediate(fn) {
+    setTimeout(fn, 0);
+  }
 
   //---------------------------------------------------------
   // EventEmitter
@@ -56,12 +59,12 @@
 
   EventEmitter.prototype.once = function(eventName, listener) {
     var self = this;
-    var invokeOnce = function invokeOnce(eventName, listener) {
+    var invokeOnce = function(eventName, listener) {
       return function oneTimeInvoker() {
         listener.apply(null, Array.prototype.slice.call(arguments));
         self.off(eventName, oneTimeInvoker);
       };
-    }
+    };
     if (isObject(eventName)) {
       // Add multiple listeners.
       var hash = eventName;
@@ -93,20 +96,19 @@
     return this;
   };
 
-  EventEmitter.prototype.emit = function(eventName, options) {
-    options = options || {};
+  EventEmitter.prototype.emit = function(eventName) {
     var args = Array.prototype.slice.call(arguments).slice(1);
-    this.listeners(eventName).forEach(
-      (options.async) ?
-        function asyncInvoker(listener) {
-          setTimeout(function() {
-            listener.apply(null, args);
-          }, 0);
-        } :
-        function syncInvoker(listener) {
-          listener.apply(null, args);
-        }
-    );
+    this.listeners(eventName).forEach(function(listener) {
+      listener.apply(null, args);
+    });
+    return this;
+  };
+
+  EventEmitter.prototype.emitAsync = function(eventName) {
+    var args = Array.prototype.slice.call(arguments).slice(1);
+    this.listeners(eventName).forEach(function(listener) {
+      setImmediate(function() { listener.apply(null, args); });
+    });
     return this;
   };
 

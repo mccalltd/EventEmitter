@@ -49,7 +49,9 @@ module.exports = function(grunt) {
             beforeEach: true,
             afterEach: true,
             it: true,
-            expect: true
+            expect: true,
+            waits: true,
+            runs: true
           }
         },
         src: ['specs.js']
