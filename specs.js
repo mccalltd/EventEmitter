@@ -6,17 +6,38 @@ describe('EventEmitter', function() {
   });
 
   describe('inheritence via extend', function() {
-    it('should extend a prototype with its own prototype methods', function() {
+    it('should extend an object with its own prototype methods', function() {
       function Thing() {}
-      EventEmitter.extend(Thing);
+      EventEmitter.extend(Thing.prototype);
       Object.getOwnPropertyNames(EventEmitter.prototype).forEach(function(prop) {
         expect(Thing.prototype[prop]).toBeDefined();
       });
+      Thing.prototype.setName = function(name) {
+        this.emit('named', { name: name });
+      };
+      var thing = new Thing();
+      thing.on('named', function(sender, args) {
+        expect(sender).toBe(thing);
+        expect(args.name).toBe('banana');
+      });
+      thing.setName('banana');
     });
   });
 
   describe('listeners', function() {
-    it('should return the listeners subscribed for an event', function() {
+    it('should return a dictionary of events and listeners', function() {
+      var emitter = new EventEmitter();
+      var onFoo = function() {};
+      var onBar = function() {};
+      emitter.on({
+        foo: onFoo,
+        bar: onBar,
+      });
+      var listeners = emitter.listeners();
+      expect(listeners.foo).toEqual([onFoo]);
+      expect(listeners.bar).toEqual([onBar]);
+    });
+    it('should return the listeners added for an event', function() {
       var emitter = new EventEmitter();
       var onFoo = function() {};
       emitter.on('foo', onFoo);
@@ -46,6 +67,15 @@ describe('EventEmitter', function() {
       expect(emitter.listeners('foo')).toEqual([onFoo]);
       expect(emitter.listeners('bar')).toEqual([onBar]);
     });
+    it('should remove the listener after first invocation if options.once is true', function() {
+      var emitter = new EventEmitter();
+      var invocations = 0;
+      var onFoo = function() { invocations++; };
+      emitter.on('foo', onFoo, { once: true });
+      emitter.emit('foo');
+      expect(invocations).toBe(1);
+      expect(emitter.listeners('foo').length).toBe(0);
+    });
     it('should be chainable', function() {
       var emitter = new EventEmitter();
       var onFoo = function() {};
@@ -54,45 +84,6 @@ describe('EventEmitter', function() {
         .on('foo', onFoo)
         .on('foo', onFoo);
       expect(emitter.listeners('foo').length).toBe(2);
-    });
-  });
-
-  describe('once', function() {
-    it('should add a listener for an event', function() {
-      var emitter = new EventEmitter();
-      var onFoo = function() {};
-      emitter.once('foo', onFoo);
-      expect(emitter.listeners('foo').length).toBe(1);
-    });
-    it('should add listeners for multiple events via a hash', function() {
-      var emitter = new EventEmitter();
-      var onFoo = function() {};
-      var onBar = function() {};
-      emitter.once({
-        foo: onFoo,
-        bar: onBar
-      });
-      expect(emitter.listeners('foo').length).toBe(1);
-      expect(emitter.listeners('bar').length).toBe(1);
-    });
-    it('should be chainable', function() {
-      var emitter = new EventEmitter();
-      var onFoo = function() {};
-      var onBar = function() {};
-      emitter
-        .once('foo', onFoo)
-        .once('foo', onFoo);
-      expect(emitter.listeners('foo').length).toBe(2);
-    });
-    it('should remove the listener after the first invocation', function() {
-      var emitter = new EventEmitter();
-      var invocations = 0;
-      var onFoo = function() { invocations++; };
-      emitter.once('foo', onFoo);
-      expect(emitter.listeners('foo').length).toBe(1);
-      emitter.emit('foo');
-      expect(invocations).toBe(1);
-      expect(emitter.listeners('foo').length).toBe(0);
     });
   });
 
@@ -143,36 +134,39 @@ describe('EventEmitter', function() {
   });
 
   describe('emit', function() {
+    it('should invoke the listeners with (sender, args)', function() {
+      var emitter = new EventEmitter();
+      var invokedWithSender;
+      var invokedWithArgs;
+      var onFoo = function(sender, args) {
+        invokedWithSender = sender;
+        invokedWithArgs = args;
+      };
+      var args = { arg1: 1, arg2: 2 };
+      emitter
+        .on('foo', onFoo)
+        .emit('foo', args);
+      expect(invokedWithSender).toBe(emitter);
+      expect(invokedWithArgs).toBe(args);
+    });
     it('should invoke all listeners for the event synchronously', function() {
       var emitter = new EventEmitter();
       var invocations = 0;
-      var inc = function() { invocations++; };
+      var onFoo = function() { invocations++; };
       emitter
-        .on('foo', inc)
-        .on('foo', inc)
+        .on('foo', onFoo)
+        .on('foo', onFoo)
         .emit('foo');
       expect(invocations).toBe(2);
     });
-    it('should be chainable', function() {
+    it('should invoke all listeners asynchronously if options.async is true', function() {
       var emitter = new EventEmitter();
       var invocations = 0;
+      var onFoo = function() { invocations++; };
       emitter
-        .on('foo', function() { invocations++; })
-        .emit('foo')
-        .emit('foo');
-      expect(invocations).toBe(2);
-    });
-  });
-
-  describe('emitAsync', function() {
-    it('should invoke all listeners for the event asynchronously', function() {
-      var emitter = new EventEmitter();
-      var invocations = 0;
-      var inc = function() { invocations++; };
-      emitter
-        .on('foo', inc)
-        .on('foo', inc)
-        .emitAsync('foo', { async: true });
+        .on('foo', onFoo)
+        .on('foo', onFoo)
+        .emit('foo', null, { async: true });
       expect(invocations).toBe(0);
       waits(1);
       runs(function() {

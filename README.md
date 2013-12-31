@@ -3,7 +3,7 @@
 EventEmitter
 ============
 
-> Simple JavaScript Event Framework
+> Simple Interface for Publishing JavaScript Events.
 
 
 Features
@@ -38,12 +38,12 @@ emitter.on({
 });
 
 // Add one-time listeners (single and multiple):
-emitter.once('event', function listener() {});
-emitter.once({
+emitter.on('event', function listener() {}, { once: true });
+emitter.on({
   foo: function() {},
   bar: function() {},
   baz: function() {}
-});
+}, { once: true });
 
 // Fetch listeners:
 emitter.listeners('foo');     // Return an array of listeners for event 'foo'.
@@ -53,11 +53,11 @@ emitter.off();                // Remove all listeners for all events.
 emitter.off('foo');           // Remove all listeners for event 'foo'.
 emitter.off('foo', listener); // Remove a specific listener for event 'foo'.
 
-// Emit events (both synchronously and asynchronously):
-emitter.emit('event');                      // Emit event with no args.
-emitter.emit('event', /* ...args */);       // Emit event with any number of args.
-emitter.emitAsync('event');
-emitter.emitAsync('event', /* ...args */);
+// Emit events:
+var args = { prop: 'value' };
+emitter.emit('event');                        // Emit event with no args.
+emitter.emit('event', args);                  // Emit event with args.
+emitter.emit('event', args, { async: true }); // Emit event asynchronously.
 
 // Everything is chainable:
 emitter
@@ -76,19 +76,18 @@ emitter
 
 ```javascript
 // Add EventEmitter behaviors to your classes:
-function Thing() {
-  EventEmitter.call(this);
-}
-EventEmitter.extend(Thing);
-Thing.prototype.setName = function(name) {
-  this.name = name;
-  this.emit('named', name);
-};
+function Thing() {}
+EventEmitter.extend(Thing.prototype);
 
 // Now 'Thing' acts as an EventEmitter:
+Thing.prototype.setName = function(name) {
+  this.name = name;
+  this.emit('named', { name: name });
+};
+
 var thing = new Thing();
-thing.on('named', function(name) {
-  console.log('The thing is called: ' + name);
+thing.on('named', function(sender, args) {
+  console.log('The thing is called: ' + args.name);
 });
 thing.setName('banana');
 // -> 'The thing is called: banana'

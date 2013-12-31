@@ -28,26 +28,22 @@
   //---------------------------------------------------------
 
   /**
-   * EventEmitter provides a simple interface for publishing events to subscribers.
+   * EventEmitter provides a simple interface for publishing events.
    *
    * @constructor
    */
-  function EventEmitter() {
-    this._listeners = {};
-  }
+  function EventEmitter() {}
 
   /**
-   * Extend the given Type's prototype with methods from EventEmitter.prototype.
-   * Combined with constructor borrowing, this provides for easy inheritance.
+   * Extend the given object with methods from EventEmitter.prototype,
+   * thereby making the object an EventEmitter.
    *
    * @param  {Type} Type The type to extend
    * @example
    *
    * // Add EventEmitter behaviors to your classes:
-   * function Thing() {
-   *   EventEmitter.call(this);
-   * }
-   * EventEmitter.extend(Thing);
+   * function Thing() {}
+   * EventEmitter.extend(Thing.prototype);
    *
    * // Now 'Thing' acts as an EventEmitter:
    * Thing.prototype.setName = function(name) {
@@ -56,35 +52,47 @@
    * };
    *
    * var thing = new Thing();
-   * thing.on('named', function(name) {
-   *   console.log('The thing is called: ' + name);
+   * thing.on('named', function(sender, args) {
+   *   console.log('The thing is called: ' + args.name);
    * });
    *
    * thing.setName('banana');
    * // -> 'The thing is called: banana'
    */
-  EventEmitter.extend = function(Type) {
+  EventEmitter.extend = function(obj) {
     Object.keys(EventEmitter.prototype).forEach(function(prop) {
-      Type.prototype[prop] = EventEmitter.prototype[prop];
+      obj[prop] = EventEmitter.prototype[prop];
     });
   };
 
   /**
-   * Get the listeners registered for an event.
+   * Get the listeners added for an event. If called with no argument,
+   * the entire listeners dictionary will be returned.
    *
-   * @param  {String} eventName
+   * @param  {String} [eventName] Optional event name
    * @return {Function[]} Registered listeners
    * @example
    *
    * var emitter = new EventEmitter();
    * emitter.on('foo', function onFoo1() {});
    * emitter.on('foo', function onFoo2() {});
+   *
+   * // Return all the listeners for every event.
+   * emitter.listeners();
+   * // -> { foo: [onFoo1, onFoo2] }
+   *
+   * // Return the listeners added for an event.
    * emitter.listeners('foo');
    * // -> [onFoo1, onFoo2]
    */
   EventEmitter.prototype.listeners = function(eventName) {
-    var dict = this._listeners;
-    return dict[eventName] || (dict[eventName] = []);
+    // Use super-private naming to help prevent collisions when inherited.
+    var dict = this.__listeners || (this.__listeners = {});
+    if (eventName) {
+      return dict[eventName] || (dict[eventName] = []);
+    } else {
+      return dict;
+    }
   };
 
   /**
@@ -92,70 +100,56 @@
    * either add a single listener by passing the event name and listener;
    * or add multiple listeners at once by passing a hash of names and listeners.
    *
+   * If `options.once` is true, the listener will be removed after its first invocation.
+   *
    * @param  {String|Object} eventName The event name or a hash of names and listeners
-   * @param  {Function} [listener] The listener, required when passing event name
+   * @param  {Function|Object} [listener] Optional listener or options
+   * @param  {Object} [options] Optional options
    * @return {EventEmitter}
    * @example
    *
    * var emitter = new EventEmitter();
+   *
+   * // Add persistent listeners
    * emitter.on('event', function listener() {});
    * emitter.on({
    *   foo: function() {},
    *   bar: function() {},
    *   baz: function() {}
    * });
-   */
-  EventEmitter.prototype.on = function(eventName, listener) {
-    var self = this;
-    if (isObject(eventName)) {
-      // Add multiple listeners.
-      var hash = eventName;
-      Object.keys(hash).forEach(function(eventName) {
-        self.listeners(eventName).push(hash[eventName]);
-      });
-    } else {
-      // Add a single listener.
-      this.listeners(eventName).push(listener);
-    }
-    return this;
-  };
-
-  /**
-   * Add a one-time listener for an event. The listener will be removed after
-   * its first invocation. There are two ways to call this method:
-   * either add a single listener by passing the event name and listener;
-   * or add multiple listeners at once by passing a hash of names and listeners.
    *
-   * @param  {String|Object} eventName The event name or a hash of names and listeners
-   * @param  {Function} [listener] The listener, required when passing event name
-   * @return {EventEmitter}
-   * @example
-   *
-   * var emitter = new EventEmitter();
-   * emitter.once('event', function listener() {});
-   * emitter.once({
+   * // Add one-time listeners
+   * emitter.on('event', function listener() {}, { once: true });
+   * emitter.on({
    *   foo: function() {},
    *   bar: function() {},
    *   baz: function() {}
-   * });
+   * }, { once: true });
    */
-  EventEmitter.prototype.once = function(eventName, listener) {
+  EventEmitter.prototype.on = function(eventName, listener, options) {
     var self = this;
-    var invokeOnce = function(eventName, listener) {
-      return function oneTimeInvoker() {
-        listener.apply(null, Array.prototype.slice.call(arguments));
-        self.off(eventName, oneTimeInvoker);
-      };
+    var addListener = function(eventName, listener) {
+      var listeners = self.listeners(eventName);
+      if (options.once) {
+        listeners.push(function invokeOnce() {
+          listener.apply(null, Array.prototype.slice.call(arguments));
+          self.off(eventName, invokeOnce);
+        });
+      } else {
+        listeners.push(listener);
+      }
     };
     if (isObject(eventName)) {
       // Add multiple listeners.
       var hash = eventName;
-      Object.keys(hash).forEach(function(prop) {
-        self.on(prop, invokeOnce(prop, hash[prop]));
+      options = listener || {};
+      Object.keys(hash).forEach(function(eventName) {
+        addListener(eventName, hash[eventName]);
       });
     } else {
       // Add a single listener.
-      this.on(eventName, invokeOnce(eventName, listener));
+      options = options || {};
+      addListener(eventName, listener);
     }
     return this;
   };
@@ -178,12 +172,18 @@
    * emitter.off('foo', listener); // Remove a specific listener for event 'foo'.
    */
   EventEmitter.prototype.off = function(eventName, listener) {
+    var self = this;
+    var removeListeners = function(eventName) {
+      self.listeners(eventName).splice(0, Number.MAX_VALUE);
+    };
     if (isUndefined(eventName)) {
       // Remove all listeners for all events.
-      this._listeners = {};
+      Object.keys(this.listeners()).forEach(function(eventName) {
+        removeListeners(eventName);
+      });
     } else if (isUndefined(listener)) {
       // Remove all listeners for the event.
-      this.listeners(eventName).splice(0, Number.MAX_VALUE);
+      removeListeners(eventName);
     } else {
       // Remove the given listener for the event.
       var listeners = this.listeners(eventName);
@@ -197,41 +197,47 @@
 
   /**
    * Emit an event, triggering the synchronous invocation of all listeners.
+   * Listeners are invoked with (sender, args), where sender is the EventEmitter
+   * or the class that inherits EventEmitter.
+   *
+   * If `options.async` is true, the listeners will be invoked asynchronously.
    *
    * @param  {String} eventName
-   * @param  {...*} [listenerArgs]
+   * @param  {Object} [args] Optional object passed to listeners via args argument
+   * @param  {Object} [options] Optional options
    * @return {EventEmitter}
    * @example
    *
    * var emitter = new EventEmitter();
+   * emitter.on('event', function(sender, args) {
+   *   console.log(sender.constructor.name, args && args.prop);
+   * });
+   *
+   * var args = { prop: 'value' };
+   *
+   * // Emit event with no args.
    * emitter.emit('event');
-   * emitter.emit('event', arg1, arg2);
-   */
-  EventEmitter.prototype.emit = function(eventName) {
-    var args = Array.prototype.slice.call(arguments).slice(1);
-    this.listeners(eventName).forEach(function(listener) {
-      listener.apply(null, args);
-    });
-    return this;
-  };
-
-  /**
-   * Emit an event, triggering the asynchronous invocation of all listeners.
+   * // -> 'EventEmitter undefined'
    *
-   * @param  {String} eventName
-   * @param  {...*} [listenerArgs]
-   * @return {EventEmitter}
-   * @example
+   * // Emit event with args.
+   * emitter.emit('event', args);
+   * // -> 'EventEmitter value'
    *
-   * var emitter = new EventEmitter();
-   * emitter.emitAsync('event');
-   * emitter.emitAsync('event', arg1, arg2);
+   * // Emit event asynchronously.
+   * emitter.emit('event', args, { async: true });
+   * // -> 'EventEmitter value'
    */
-  EventEmitter.prototype.emitAsync = function(eventName) {
-    var args = Array.prototype.slice.call(arguments).slice(1);
-    this.listeners(eventName).forEach(function(listener) {
-      setImmediate(function() { listener.apply(null, args); });
-    });
+  EventEmitter.prototype.emit = function(eventName, args, options) {
+    var self = this;
+    options = options || {};
+    var invoke = (options.async) ?
+      function(listener) {
+        setImmediate(function() { listener.call(null, self, args); });
+      } :
+      function(listener) {
+        listener.call(null, self, args);
+      };
+    this.listeners(eventName).forEach(invoke);
     return this;
   };
 
