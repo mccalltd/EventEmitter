@@ -5,6 +5,8 @@ EventEmitter
 
 [![Build Status](https://travis-ci.org/mccalltd/EventEmitter.png)](https://travis-ci.org/mccalltd/EventEmitter)
 
+[Build History](https://travis-ci.org/mccalltd/EventEmitter/builds)
+
 
 Features
 --------
@@ -93,9 +95,3 @@ thing.on('named', function(name) {
 thing.setName('banana');
 // -> 'The thing is called: banana'
 ```
-
-
-Builds
-------
-
-[History](https://travis-ci.org/mccalltd/EventEmitter/builds)
