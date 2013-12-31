@@ -13,7 +13,7 @@ Features
 - Easy to extend your existing classes with its functionality.
 - Available in all JavaScript runtime environements.
 - AMD/CommonJS compatible.
-- Small set of memorable methods: `on`, `once`, `off`, and `emit`. That's it.
+- Small set of memorable methods: `on`, `off` and `emit`. That's it.
 - Standardized signature for event listeners: `function(sender, args)`.
 - Chainable API for easy and elegant use.
 
