@@ -17,8 +17,6 @@ Features
 - Standardized signature for event listeners: `function(sender, args)`.
 - Chainable API for easy and elegant use.
 
-Currently available for Node and MODERN BROWSERS ONLY (IE 9+, et al).
-
 
 Usage
 -----

@@ -26,7 +26,14 @@
     setTimeout(fn, 0);
   }
 
-  // Enumerate an object's own properties.
+  // Enumerate an array, yielding values.
+  function each(arr, callback) {
+    for (var i = 0, n = arr.length; i < n; i++) {
+      callback(arr[i]);
+    }
+  }
+
+  // Enumerate an object's own properties, yielding the property name and value.
   function own(obj, callback) {
     for (var prop in obj) {
       if (obj.hasOwnProperty(prop)) {
@@ -109,7 +116,7 @@
 
   /**
    * Add a listener for an event. There are two ways to call this method:
-   * either add a single listener by passing the event name and listener;
+   * add a single listener by passing the event name and listener;
    * or add multiple listeners at once by passing a hash of names and listeners.
    *
    * If `options.once` is true, the listener will be removed after its first invocation.
@@ -242,14 +249,14 @@
   EventEmitter.prototype.emit = function(eventName, args, options) {
     var self = this;
     options = options || {};
-    var invoke = (options.async) ?
+    each(this.listeners(eventName), (options.async) ?
       function(listener) {
         setImmediate(function() { listener.call(null, self, args); });
       } :
       function(listener) {
         listener.call(null, self, args);
-      };
-    this.listeners(eventName).forEach(invoke);
+      }
+    );
     return this;
   };
 
