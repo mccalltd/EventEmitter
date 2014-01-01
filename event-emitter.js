@@ -13,14 +13,26 @@
   // Utilities
   //---------------------------------------------------------
 
+  // Type checks.
   function isObject(x) {
     return typeof x === 'object';
   }
   function isUndefined(x) {
     return typeof x === 'undefined';
   }
+
+  // Invoke functions asynchronously, without delay.
   function setImmediate(fn) {
     setTimeout(fn, 0);
+  }
+
+  // Enumerate an object's own properties.
+  function own(obj, callback) {
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+        callback(prop, obj[prop]);
+      }
+    }
   }
 
   //---------------------------------------------------------
@@ -60,8 +72,8 @@
    * // -> 'The thing is called: banana'
    */
   EventEmitter.extend = function(obj) {
-    Object.keys(EventEmitter.prototype).forEach(function(prop) {
-      obj[prop] = EventEmitter.prototype[prop];
+    own(EventEmitter.prototype, function(prop, value) {
+      obj[prop] = value;
     });
   };
 
@@ -143,8 +155,8 @@
       // Add multiple listeners.
       var hash = eventName;
       options = listener || {};
-      Object.keys(hash).forEach(function(eventName) {
-        addListener(eventName, hash[eventName]);
+      own(hash, function(eventName, listener) {
+        addListener(eventName, listener);
       });
     } else {
       // Add a single listener.
@@ -178,7 +190,7 @@
     };
     if (isUndefined(eventName)) {
       // Remove all listeners for all events.
-      Object.keys(this.listeners()).forEach(function(eventName) {
+      own(this.listeners(), function(eventName) {
         removeListeners(eventName);
       });
     } else if (isUndefined(listener)) {

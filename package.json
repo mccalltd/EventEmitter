@@ -1,9 +1,9 @@
 {
   "name": "EventEmitter",
   "version": "0.0.0",
-  "description": "Client-Side JavaScript Events a la Node.js.",
+  "description": "Simple Interface for Publishing JavaScript Events.",
   "homepage": "https://github.com/mccalltd/EventEmitter",
-  "main": "EventEmitter.js",
+  "main": "event-emitter.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

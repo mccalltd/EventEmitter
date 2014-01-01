@@ -39,7 +39,7 @@ module.exports = function(grunt) {
             module: true
           }
         },
-        src: ['EventEmitter.js']
+        src: ['event-emitter.js']
       },
       test: {
         options: {
@@ -61,7 +61,7 @@ module.exports = function(grunt) {
     // test
     karma: {
       options: {
-        files: ['EventEmitter.js', 'specs.js'],
+        files: ['event-emitter.js', 'specs.js'],
         frameworks: ['jasmine'],
         browsers: ['PhantomJS'],
         reporters: ['dots']
@@ -73,7 +73,7 @@ module.exports = function(grunt) {
         singleRun: true,
         reporters: ['dots', 'coverage'],
         preprocessors: {
-          'EventEmitter.js': ['coverage']
+          'event-emitter.js': ['coverage']
         },
         coverageReporter: {
           reporters: [
@@ -91,11 +91,11 @@ module.exports = function(grunt) {
     uglify: {
       dist: {
         options: {
-          sourceMap: 'dist/EventEmitter.min.map',
+          sourceMap: 'dist/event-emitter.min.map',
           banner: '<%= meta.banner %>'
         },
         files: {
-          'dist/EventEmitter.min.js': ['EventEmitter.js']
+          'dist/event-emitter.min.js': ['event-emitter.js']
         }
       }
     },

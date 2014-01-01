@@ -9,18 +9,9 @@ describe('EventEmitter', function() {
     it('should extend an object with its own prototype methods', function() {
       function Thing() {}
       EventEmitter.extend(Thing.prototype);
-      Object.getOwnPropertyNames(EventEmitter.prototype).forEach(function(prop) {
+      Object.keys(EventEmitter.prototype).forEach(function(prop) {
         expect(Thing.prototype[prop]).toBeDefined();
       });
-      Thing.prototype.setName = function(name) {
-        this.emit('named', { name: name });
-      };
-      var thing = new Thing();
-      thing.on('named', function(sender, args) {
-        expect(sender).toBe(thing);
-        expect(args.name).toBe('banana');
-      });
-      thing.setName('banana');
     });
   });
 
