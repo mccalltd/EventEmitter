@@ -208,22 +208,21 @@
    * emitter.on('event', function listener() {});
    * emitter.on({
    *   foo: function() {},
-   *   bar: function() {},
-   *   baz: function() {}
+   *   bar: function() {}
    * });
    *
    * // Add one-time listeners
    * emitter.on('event', function listener() {}, { once: true });
    * emitter.on({
    *   foo: function() {},
-   *   bar: function() {},
-   *   baz: function() {}
+   *   bar: function() {}
    * }, { once: true });
    *
    * // Add listeners for namespaced events
    * emitter.on('event.namespace', function listener() {});
    * emitter.on({
-   *   'foo.namespace': function() {}
+   *   'foo.namespace': function() {},
+   *   'bar.namespace': function() {}
    * });
    */
   EventEmitter.prototype.on = function(eventName, listener, options) {

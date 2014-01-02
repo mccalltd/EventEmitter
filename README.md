@@ -22,25 +22,24 @@ Features
 Usage
 -----
 
-### Standalone Usage (Not Extending Anything Here):
+#### Standalone Usage:
 
 ```javascript
 var emitter = new EventEmitter();
 ```
 
-### Add Listeners for Events (Single and Multiple):
+#### Add Listeners:
 
 ```javascript
 emitter.on('event', function listener() {});
 emitter.on({
-  foo: function onFoo() {},
   foo: function onFoo() {},
   bar: function onBar() {},
   baz: function onBaz() {}
 });
 ```
 
-### Add One-time Listeners (Single And Multiple):
+#### Add One-time Listeners:
 
 ```javascript
 emitter.on('event', function listener() {}, { once: true });
@@ -51,16 +50,17 @@ emitter.on({
 }, { once: true });
 ```
 
-### Add Listeners For Namespaced Events
+#### Add Namespaced Listeners:
 
 ```javascript
 emitter.on('event.namespace', function listener() {});
 emitter.on({
-  'foo.namespace': function() {}
+  'foo.namespace': function() {},
+  'bar.namespace': function() {}
 });
 ```
 
-### Remove Listeners:
+#### Remove Listeners:
 
 ```javascript
 emitter.off();                // Remove all listeners for all events.
@@ -70,7 +70,7 @@ emitter.off('foo.namespace'); // Remove all listeners for namespaced event.
 emitter.off('.namespace');    // Remove all event listeners with 'namespace'.
 ```
 
-### Emit Events:
+#### Emit Events:
 
 ```javascript
 var args = { prop: 'value' };
@@ -79,7 +79,7 @@ emitter.emit('event', args);                  // Emit event with args.
 emitter.emit('event', args, { async: true }); // Emit event asynchronously.
 ```
 
-### Everything Is Chainable:
+#### Chain Everything:
 
 ```javascript
 emitter
@@ -89,7 +89,7 @@ emitter
   .emit('foo'); // ->
 ```
 
-### Extending Classes With EventEmitter:
+#### Extend Classes With EventEmitter:
 
 ```javascript
 // Add EventEmitter behaviors to your classes:
