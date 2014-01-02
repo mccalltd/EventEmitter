@@ -51,7 +51,8 @@ module.exports = function(grunt) {
             it: true,
             expect: true,
             waits: true,
-            runs: true
+            runs: true,
+            spyOn: true
           }
         },
         src: ['specs.js']

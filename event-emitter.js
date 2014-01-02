@@ -13,12 +13,30 @@
   // Utilities
   //---------------------------------------------------------
 
-  // Type checks.
+  // Type checks
   function isObject(x) {
     return typeof x === 'object';
   }
   function isUndefined(x) {
     return typeof x === 'undefined';
+  }
+  function isString(x) {
+    return typeof x === 'string';
+  }
+  function isNullOrUndefined(x) {
+    return typeof x === 'undefined';
+  }
+
+  // Parameter validation
+  function require(value, message) {
+    if (isNullOrUndefined(value)) {
+      throw message;
+    }
+  }
+  function disallowBareNamespaces(value) {
+    if (isString(value) && value.indexOf('.') === 0) {
+      throw 'eventName cannot be a bare namespace: prefix with an event name instead';
+    }
   }
 
   // Invoke functions asynchronously, without delay.
@@ -26,7 +44,10 @@
     setTimeout(fn, 0);
   }
 
-  // Enumerate an array, yielding values.
+  // Array utilities
+  function empty(arr) {
+    arr.splice(0, Number.MAX_VALUE);
+  }
   function each(arr, callback) {
     for (var i = 0, n = arr.length; i < n; i++) {
       callback(arr[i]);
@@ -45,6 +66,59 @@
   //---------------------------------------------------------
   // EventEmitter
   //---------------------------------------------------------
+
+  /**
+   * Iterate over each event in the dictionary and invoke the action with
+   * (nameWithNs, listeners) for events that match the event name or namespace.
+   *
+   * @private
+   * @param  {EventEmitter} scope
+   * @param  {String} eventName
+   * @param  {Function} action
+   * @example
+   *
+   * var emitter = new EventEmitter();
+   * emitter.on('foo', function onFoo() {});
+   * emitter.on('foo.namespace', function onFooNs() {});
+   * emitter.on('bar.namespace', function onBarNs() {});
+   *
+   * var listeners = emitter.listeners();
+   * var action = function(key, value) {
+   *   console.log(key, value);
+   * };
+   *
+   * eachEventMatching(listeners, 'foo', action);
+   * // -> 'foo' [onFoo]
+   * // -> 'foo.namespace' [onFooNs]
+   *
+   * eachEventMatching(listeners, '.namespace', action);
+   * // -> 'foo.namespace' [onFooNs]
+   * // -> 'bar.namespace' [onBarNs]
+   */
+  function eachEventMatching(scope, eventName, action) {
+    var indexOfNamespace = eventName.indexOf('.');
+    if (indexOfNamespace === 0) {
+      // Invoke action for everything in the namespace.
+      var namespace = eventName.slice(indexOfNamespace);
+      own(scope.listeners(), function(prop, value) {
+        if (~prop.indexOf(namespace)) {
+          action(prop, value);
+        }
+      });
+    } else {
+      if (~indexOfNamespace) {
+        // Invoke action for the namespaced event.
+        action(eventName, scope.listeners(eventName));
+      } else {
+        // Invoke action for the event and all child namespaces.
+        own(scope.listeners(), function(prop, value) {
+          if (prop === eventName || prop.indexOf(eventName + '.') === 0) {
+            action(prop, value);
+          }
+        });
+      }
+    }
+  }
 
   /**
    * EventEmitter provides a simple interface for publishing events.
@@ -95,10 +169,11 @@
    * var emitter = new EventEmitter();
    * emitter.on('foo', function onFoo1() {});
    * emitter.on('foo', function onFoo2() {});
+   * emitter.on('bar', function onBar() {});
    *
    * // Return all the listeners for every event.
    * emitter.listeners();
-   * // -> { foo: [onFoo1, onFoo2] }
+   * // -> { foo: [onFoo1, onFoo2, onBar] }
    *
    * // Return the listeners added for an event.
    * emitter.listeners('foo');
@@ -144,15 +219,23 @@
    *   bar: function() {},
    *   baz: function() {}
    * }, { once: true });
+   *
+   * // Add listeners for namespaced events
+   * emitter.on('event.namespace', function listener() {});
+   * emitter.on({
+   *   'foo.namespace': function() {}
+   * });
    */
   EventEmitter.prototype.on = function(eventName, listener, options) {
-    var self = this;
+    require(eventName, 'eventName is required');
+    disallowBareNamespaces(eventName);
+    var emitter = this;
     var addListener = function(eventName, listener) {
-      var listeners = self.listeners(eventName);
+      var listeners = emitter.listeners(eventName);
       if (options.once) {
         listeners.push(function invokeOnce() {
           listener.apply(null, Array.prototype.slice.call(arguments));
-          self.off(eventName, invokeOnce);
+          emitter.off(eventName, invokeOnce);
         });
       } else {
         listeners.push(listener);
@@ -160,11 +243,8 @@
     };
     if (isObject(eventName)) {
       // Add multiple listeners.
-      var hash = eventName;
       options = listener || {};
-      own(hash, function(eventName, listener) {
-        addListener(eventName, listener);
-      });
+      own(eventName, addListener);
     } else {
       // Add a single listener.
       options = options || {};
@@ -189,26 +269,26 @@
    * emitter.off();                // Remove all listeners for all events.
    * emitter.off('foo');           // Remove all listeners for event 'foo'.
    * emitter.off('foo', listener); // Remove a specific listener for event 'foo'.
+   * emitter.off('foo.namespace'); // Remove all listeners for namespaced event.
+   * emitter.off('.namespace');    // Remove all event listeners with 'namespace'.
    */
   EventEmitter.prototype.off = function(eventName, listener) {
-    var self = this;
-    var removeListeners = function(eventName) {
-      self.listeners(eventName).splice(0, Number.MAX_VALUE);
-    };
     if (isUndefined(eventName)) {
       // Remove all listeners for all events.
-      own(this.listeners(), function(eventName) {
-        removeListeners(eventName);
+      own(this.listeners(), function(prop, value) {
+        empty(value);
       });
     } else if (isUndefined(listener)) {
-      // Remove all listeners for the event.
-      removeListeners(eventName);
+      // Remove listeners for events that match the event name.
+      eachEventMatching(this, eventName, function(nameWithNs, listeners) {
+        empty(listeners);
+      });
     } else {
       // Remove the given listener for the event.
       var listeners = this.listeners(eventName);
-      var index = listeners.indexOf(listener);
-      if (~index) {
-        listeners.splice(index, 1);
+      var indexOfListener = listeners.indexOf(listener);
+      if (~indexOfListener) {
+        listeners.splice(indexOfListener, 1);
       }
     }
     return this;
@@ -244,19 +324,23 @@
    *
    * // Emit event asynchronously.
    * emitter.emit('event', args, { async: true });
-   * // -> 'EventEmitter value'
    */
   EventEmitter.prototype.emit = function(eventName, args, options) {
-    var self = this;
+    require(eventName, 'eventName is required');
+    disallowBareNamespaces(eventName);
     options = options || {};
-    each(this.listeners(eventName), (options.async) ?
+    var appliedArguments = [this, args];
+    var invoker = (options.async) ?
       function(listener) {
-        setImmediate(function() { listener.call(null, self, args); });
+        setImmediate(function() { listener.apply(null, appliedArguments); });
       } :
       function(listener) {
-        listener.call(null, self, args);
-      }
-    );
+        listener.apply(null, appliedArguments);
+      };
+    // Emit events that match the event name.
+    eachEventMatching(this, eventName, function(nameWithNs, listeners) {
+      each(listeners, invoker);
+    });
     return this;
   };
 
