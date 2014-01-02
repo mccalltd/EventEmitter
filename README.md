@@ -15,64 +15,81 @@ Features
 - AMD/CommonJS compatible.
 - Small set of memorable methods: `on`, `off` and `emit`. That's it.
 - Standardized signature for event listeners: `function(sender, args)`.
+- Event namespacing.
 - Chainable API for easy and elegant use.
 
 
 Usage
 -----
 
-### Basics
+#### Standalone Usage:
 
 ```javascript
-// Standalone usage (not extending anything here):
 var emitter = new EventEmitter();
+```
 
-// Add listeners for events (single and multiple):
+#### Add Listeners:
+
+```javascript
 emitter.on('event', function listener() {});
 emitter.on({
   foo: function onFoo() {},
   bar: function onBar() {},
   baz: function onBaz() {}
 });
+```
 
-// Add one-time listeners (single and multiple):
+#### Add One-time Listeners:
+
+```javascript
 emitter.on('event', function listener() {}, { once: true });
 emitter.on({
   foo: function() {},
   bar: function() {},
   baz: function() {}
 }, { once: true });
+```
 
-// Fetch listeners:
-emitter.listeners('foo');     // Return an array of listeners for event 'foo'.
+#### Add Namespaced Listeners:
 
-// Remove listeners:
+```javascript
+emitter.on('event.namespace', function listener() {});
+emitter.on({
+  'foo.namespace': function() {},
+  'bar.namespace': function() {}
+});
+```
+
+#### Remove Listeners:
+
+```javascript
 emitter.off();                // Remove all listeners for all events.
-emitter.off('foo');           // Remove all listeners for event 'foo'.
+emitter.off('foo');           // Remove all listeners for event 'foo', including child namespaces.
 emitter.off('foo', listener); // Remove a specific listener for event 'foo'.
+emitter.off('foo.namespace'); // Remove all listeners for namespaced event.
+emitter.off('.namespace');    // Remove all event listeners with 'namespace'.
+```
 
-// Emit events:
+#### Emit Events:
+
+```javascript
 var args = { prop: 'value' };
 emitter.emit('event');                        // Emit event with no args.
 emitter.emit('event', args);                  // Emit event with args.
 emitter.emit('event', args, { async: true }); // Emit event asynchronously.
-
-// Everything is chainable:
-emitter
-  .on('foo', function() { console.log('foo'); })
-  .on('bar', function() { console.log('bar'); }, { once: true })
-  .emit('foo') // -> 'foo'
-  .emit('bar') // -> 'bar'
-  .emit('bar') // ->
-  .off('foo')
-  .on('foo', function(sender, args) {
-    console.log('another foo for ' + args.who);
-  })
-  .emit('foo', { who: 'you' }) // -> 'another foo for you'
-  .off();
 ```
 
-### Extending Classes With EventEmitter
+#### Chain Everything:
+
+```javascript
+emitter
+  .on('foo', function() { console.log('foo'); })
+  .emit('foo') // -> 'foo'
+  .off('foo')
+  .emit('foo'); // ->
+```
+
+#### Extend Classes With EventEmitter:
 
 ```javascript
 // Add EventEmitter behaviors to your classes:
