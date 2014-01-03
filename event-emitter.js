@@ -13,8 +13,8 @@
   // Utilities
   //---------------------------------------------------------
 
-  function disallowBareNamespaces(value) {
-    if (isString(value) && value.indexOf('.') === 0) {
+  function disallowBareNamespaces(eventName) {
+    if (isString(eventName) && eventName.indexOf('.') === 0) {
       throw 'eventName cannot be a bare namespace: prefix with an event name instead';
     }
   }
@@ -30,7 +30,7 @@
   }
 
   function isNullOrUndefined(x) {
-    return typeof x === 'undefined' || x === null;
+    return isUndefined(x) || x === null;
   }
 
   function isObject(x) {
@@ -214,9 +214,9 @@
     disallowBareNamespaces(eventName);
     require(listener, 'listener is required');
     options = options || {};
-    var emitter = this;
     var listeners = this.listeners(eventName);
     if (options.once) {
+      var emitter = this;
       listeners.push(function invokeOnce() {
         listener.apply(null, Array.prototype.slice.call(arguments));
         emitter.off(eventName, invokeOnce);
