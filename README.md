@@ -32,9 +32,9 @@ var emitter = new EventEmitter();
 
 ```javascript
 var listener = function() {};
-emitter.on('event', listener);                 // Basic configuration.
-emitter.on('event', listener, { once: true }); // One-time listeners.
-emitter.on('event.namespace', listener);       // Namespaced events.
+emitter.on('event', listener);                 // Add listener for event.
+emitter.on('event', listener, { once: true }); // Add one-time listener.
+emitter.on('event.namespace', listener);       // Add listener for namespaced event.
 ```
 
 #### Remove Listeners:
