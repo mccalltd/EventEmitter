@@ -31,33 +31,10 @@ var emitter = new EventEmitter();
 #### Add Listeners:
 
 ```javascript
-emitter.on('event', function listener() {});
-emitter.on({
-  foo: function onFoo() {},
-  bar: function onBar() {},
-  baz: function onBaz() {}
-});
-```
-
-#### Add One-time Listeners:
-
-```javascript
-emitter.on('event', function listener() {}, { once: true });
-emitter.on({
-  foo: function() {},
-  bar: function() {},
-  baz: function() {}
-}, { once: true });
-```
-
-#### Add Namespaced Listeners:
-
-```javascript
-emitter.on('event.namespace', function listener() {});
-emitter.on({
-  'foo.namespace': function() {},
-  'bar.namespace': function() {}
-});
+var listener = function() {};
+emitter.on('event', listener);                 // Basic configuration.
+emitter.on('event', listener, { once: true }); // One-time listeners.
+emitter.on('event.namespace', listener);       // Namespaced events.
 ```
 
 #### Remove Listeners:

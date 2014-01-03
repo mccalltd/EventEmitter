@@ -13,54 +13,54 @@
   // Utilities
   //---------------------------------------------------------
 
-  // Type checks
-  function isObject(x) {
-    return typeof x === 'object';
-  }
-  function isUndefined(x) {
-    return typeof x === 'undefined';
-  }
-  function isString(x) {
-    return typeof x === 'string';
-  }
-  function isNullOrUndefined(x) {
-    return typeof x === 'undefined';
-  }
-
-  // Parameter validation
-  function require(value, message) {
-    if (isNullOrUndefined(value)) {
-      throw message;
-    }
-  }
   function disallowBareNamespaces(value) {
     if (isString(value) && value.indexOf('.') === 0) {
       throw 'eventName cannot be a bare namespace: prefix with an event name instead';
     }
   }
 
-  // Invoke functions asynchronously, without delay.
-  function setImmediate(fn) {
-    setTimeout(fn, 0);
-  }
-
-  // Array utilities
-  function empty(arr) {
-    arr.splice(0, Number.MAX_VALUE);
-  }
   function each(arr, callback) {
     for (var i = 0, n = arr.length; i < n; i++) {
       callback(arr[i]);
     }
   }
 
-  // Enumerate an object's own properties, yielding the property name and value.
+  function empty(arr) {
+    arr.splice(0, Number.MAX_VALUE);
+  }
+
+  function isNullOrUndefined(x) {
+    return typeof x === 'undefined' || x === null;
+  }
+
+  function isObject(x) {
+    return typeof x === 'object';
+  }
+
+  function isString(x) {
+    return typeof x === 'string';
+  }
+
+  function isUndefined(x) {
+    return typeof x === 'undefined';
+  }
+
   function own(obj, callback) {
     for (var prop in obj) {
       if (obj.hasOwnProperty(prop)) {
         callback(prop, obj[prop]);
       }
     }
+  }
+
+  function require(value, message) {
+    if (isNullOrUndefined(value)) {
+      throw message;
+    }
+  }
+
+  function setImmediate(fn) {
+    setTimeout(fn, 0);
   }
 
   //---------------------------------------------------------
@@ -173,7 +173,10 @@
    *
    * // Return all the listeners for every event.
    * emitter.listeners();
-   * // -> { foo: [onFoo1, onFoo2, onBar] }
+   * // -> {
+   * //  foo: [onFoo1, onFoo2],
+   * //  bar: [onBar]
+   * //}
    *
    * // Return the listeners added for an event.
    * emitter.listeners('foo');
@@ -190,64 +193,36 @@
   };
 
   /**
-   * Add a listener for an event. There are two ways to call this method:
-   * add a single listener by passing the event name and listener;
-   * or add multiple listeners at once by passing a hash of names and listeners.
+   * Add a listener for an event.
    *
    * If `options.once` is true, the listener will be removed after its first invocation.
    *
-   * @param  {String|Object} eventName The event name or a hash of names and listeners
-   * @param  {Function|Object} [listener] Optional listener or options
+   * @param  {String} eventName
+   * @param  {Function} listener
    * @param  {Object} [options] Optional options
    * @return {EventEmitter}
    * @example
    *
    * var emitter = new EventEmitter();
-   *
-   * // Add persistent listeners
-   * emitter.on('event', function listener() {});
-   * emitter.on({
-   *   foo: function() {},
-   *   bar: function() {}
-   * });
-   *
-   * // Add one-time listeners
-   * emitter.on('event', function listener() {}, { once: true });
-   * emitter.on({
-   *   foo: function() {},
-   *   bar: function() {}
-   * }, { once: true });
-   *
-   * // Add listeners for namespaced events
-   * emitter.on('event.namespace', function listener() {});
-   * emitter.on({
-   *   'foo.namespace': function() {},
-   *   'bar.namespace': function() {}
-   * });
+   * var listener = function() {};
+   * emitter.on('event', listener);                 // Add listener for event.
+   * emitter.on('event', listener, { once: true }); // Add one-time listener.
+   * emitter.on('event.namespace', listener);       // Add listener for namespaced event.
    */
   EventEmitter.prototype.on = function(eventName, listener, options) {
     require(eventName, 'eventName is required');
     disallowBareNamespaces(eventName);
+    require(listener, 'listener is required');
+    options = options || {};
     var emitter = this;
-    var addListener = function(eventName, listener) {
-      var listeners = emitter.listeners(eventName);
-      if (options.once) {
-        listeners.push(function invokeOnce() {
-          listener.apply(null, Array.prototype.slice.call(arguments));
-          emitter.off(eventName, invokeOnce);
-        });
-      } else {
-        listeners.push(listener);
-      }
-    };
-    if (isObject(eventName)) {
-      // Add multiple listeners.
-      options = listener || {};
-      own(eventName, addListener);
+    var listeners = this.listeners(eventName);
+    if (options.once) {
+      listeners.push(function invokeOnce() {
+        listener.apply(null, Array.prototype.slice.call(arguments));
+        emitter.off(eventName, invokeOnce);
+      });
     } else {
-      // Add a single listener.
-      options = options || {};
-      addListener(eventName, listener);
+      listeners.push(listener);
     }
     return this;
   };
@@ -264,6 +239,7 @@
    * @example
    *
    * var emitter = new EventEmitter();
+   * var listener = function() {};
    * // ...
    * emitter.off();                // Remove all listeners for all events.
    * emitter.off('foo');           // Remove all listeners for event 'foo'.
@@ -312,17 +288,9 @@
    * });
    *
    * var args = { prop: 'value' };
-   *
-   * // Emit event with no args.
-   * emitter.emit('event');
-   * // -> 'EventEmitter undefined'
-   *
-   * // Emit event with args.
-   * emitter.emit('event', args);
-   * // -> 'EventEmitter value'
-   *
-   * // Emit event asynchronously.
-   * emitter.emit('event', args, { async: true });
+   * emitter.emit('event');                        // Emit event with no args.
+   * emitter.emit('event', args);                  // Emit event with args.
+   * emitter.emit('event', args, { async: true }); // Emit event asynchronously.
    */
   EventEmitter.prototype.emit = function(eventName, args, options) {
     require(eventName, 'eventName is required');

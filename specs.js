@@ -58,8 +58,12 @@ describe('EventEmitter', function() {
 
   describe('on', function() {
     it('should throw if event name is null or undefined', function() {
-      expect(function() { emitter.on(); })
-        .toThrow('eventName is required');
+      expect(function() { emitter.on(); }).toThrow('eventName is required');
+      expect(function() { emitter.on(null); }).toThrow('eventName is required');
+    });
+    it('should throw if listener is null or undefined', function() {
+      expect(function() { emitter.on('event'); }).toThrow('listener is required');
+      expect(function() { emitter.on('event', null); }).toThrow('listener is required');
     });
     it('should throw if the eventName is a bare namespace', function() {
       expect(function() { emitter.on('.namespace'); })
@@ -68,14 +72,6 @@ describe('EventEmitter', function() {
     it('should add a listener for an event', function() {
       emitter.on('foo', onFoo);
       expect(emitter.listeners('foo')).toEqual([onFoo]);
-    });
-    it('should add listeners for multiple events via a hash', function() {
-      emitter.on({
-        foo: onFoo,
-        bar: onBar
-      });
-      expect(emitter.listeners('foo')).toEqual([onFoo]);
-      expect(emitter.listeners('bar')).toEqual([onBar]);
     });
     it('should remove the listener after first invocation if options.once is true', function() {
       emitter.on('foo', increment, { once: true });
@@ -93,13 +89,15 @@ describe('EventEmitter', function() {
 
   describe('off', function() {
     it('should remove all listeners for all events', function() {
-      emitter.on({ foo: onFoo, bar: onBar });
+      emitter.on('foo', onFoo);
+      emitter.on('bar', onBar);
       emitter.off();
       expect(emitter.listeners('foo').length).toBe(0);
       expect(emitter.listeners('bar').length).toBe(0);
     });
     it('should remove all listeners for an event', function() {
-      emitter.on({ foo: onFoo, bar: onBar });
+      emitter.on('foo', onFoo);
+      emitter.on('bar', onBar);
       emitter.off('foo');
       expect(emitter.listeners('foo').length).toBe(0);
       expect(emitter.listeners('bar').length).toBe(1);
