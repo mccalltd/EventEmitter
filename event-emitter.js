@@ -183,7 +183,6 @@
    * // -> [onFoo1, onFoo2]
    */
   EventEmitter.prototype.listeners = function(eventName) {
-    // Use super-private naming to help prevent collisions when inherited.
     var dict = this.__listeners || (this.__listeners = {});
     if (eventName) {
       return dict[eventName] || (dict[eventName] = []);
@@ -296,18 +295,19 @@
     require(eventName, 'eventName is required');
     disallowBareNamespaces(eventName);
     options = options || {};
-    var appliedArguments = [this, args];
-    var invoker = (options.async) ?
-      function(listener) {
-        setImmediate(function() { listener.apply(null, appliedArguments); });
-      } :
-      function(listener) {
-        listener.apply(null, appliedArguments);
-      };
-    // Emit events that match the event name.
-    eachEventMatching(this, eventName, function(nameWithNs, listeners) {
-      each(listeners, invoker);
-    });
+    var emitter = this;
+    var invoker = function() {
+      eachEventMatching(emitter, eventName, function(nameWithNs, listeners) {
+        each(listeners.slice(), function(listener) {
+          listener.call(null, emitter, args);
+        });
+      });
+    };
+    if (options.async) {
+      setImmediate(invoker);
+    } else {
+      invoker();
+    }
     return this;
   };
 
