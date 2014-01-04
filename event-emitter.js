@@ -82,16 +82,11 @@
    * emitter.on('foo.namespace', function onFooNs() {});
    * emitter.on('bar.namespace', function onBarNs() {});
    *
-   * var listeners = emitter.listeners();
-   * var action = function(key, value) {
-   *   console.log(key, value);
-   * };
-   *
-   * eachEventMatching(listeners, 'foo', action);
+   * eachEventMatching(emitter, 'foo', console.log);
    * // -> 'foo' [onFoo]
    * // -> 'foo.namespace' [onFooNs]
    *
-   * eachEventMatching(listeners, '.namespace', action);
+   * eachEventMatching(emitter, '.namespace', console.log);
    * // -> 'foo.namespace' [onFooNs]
    * // -> 'bar.namespace' [onBarNs]
    */
